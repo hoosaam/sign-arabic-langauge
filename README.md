@@ -1,4 +1,4 @@
-# Sign Language Recognition (ASL/Arabic) — Computer Vision Project
+# Sign Language Recognition (ASL) — Computer Vision Project
 
 This project performs real-time hand sign recognition using computer vision and deep learning. It uses MediaPipe to extract 3D hand landmarks (keypoints) from a webcam feed, then feeds the landmarks into a trained TensorFlow/Keras model to classify the sign.
 
