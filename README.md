@@ -114,3 +114,53 @@ jupyter notebook sign_language.ipynb
 - Add smoothing over several frames to stabilize predictions
 - Provide a simple GUI and on-screen instructions
 - Export a `requirements.txt` and a small demo dataset
+
+## Model Concept and Architecture
+
+- The core idea: classify a single hand sign using only 3D hand landmarks (21 points × x/y/z = 63 features) instead of raw images. This reduces input size, speeds up training/inference, and focuses on pose rather than background/lighting.
+- Typical architecture used here (for `asl_keypoints_model.h5`):
+  - Input: 63-dim vector of normalized landmark coordinates
+  - Several Dense (fully-connected) layers with ReLU activation
+  - Dropout for regularization
+  - Output: Softmax layer over 29 classes (`A`–`Z`, `del`, `nothing`, `space`)
+- Loss: Categorical cross-entropy; Optimizer: Adam (commonly used)
+
+## Data and Preprocessing
+
+- Dataset: ASL Alphabet (static hand signs) downloaded from Kaggle.
+- Preprocessing pipeline:
+  - Detect a hand with MediaPipe Hands for each image/frame.
+  - Extract 21 landmarks → concatenate (x, y, z) into a 63-length vector.
+  - Optional normalization (e.g., relative to wrist or bounding box) to reduce scale/translation variance.
+  - Encode labels to match `class_names` order.
+
+## Training Workflow (Notebook)
+
+- Split data into training/validation (e.g., 80/20).
+- Train the MLP/Dense network on landmark vectors.
+- Monitor validation accuracy/loss; adjust epochs, learning rate, dropout if needed.
+- Save the trained model as `asl_keypoints_model.h5` for use in `app.py`.
+
+## Evaluation and Tips
+
+- Evaluate on a held-out validation split and on real webcam data.
+- Failure modes:
+  - Poor lighting or partial hand in frame → landmarks less stable
+  - Unseen camera angles or occlusions
+  - Class confusion for visually similar signs
+- Improve by:
+  - Collecting more diverse samples per class
+  - Data augmentation (rotate/scale/jitter landmarks)
+  - Adding temporal smoothing across consecutive frames
+
+## How to Retrain with Your Own Data
+
+1) Collect images or short clips for each target class (e.g., `Data/A`, `Data/B`, ...).
+2) In the notebook, run the preprocessing cells to extract landmarks and build `X` (features) and `y` (labels).
+3) Train the model (`model.fit(...)`).
+4) Save: `model.save("asl_keypoints_model.h5")`.
+5) Ensure `class_names` in `app.py` matches the label order used during training.
+
+## Inference Pipeline (Real-time)
+
+- Capture a frame from webcam → detect hand → extract 21 landmarks → build 63-dim vector → run through the model → map argmax to human-readable label (`class_names`) → overlay text on the frame.
