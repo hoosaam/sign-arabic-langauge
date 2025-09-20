@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import mediapipe as mp
 
-model = tf.keras.models.load_model("asl_keypoints_model.h5")
+model = tf.keras.models.load_model("asl_keypoints_model_V2.h5")
 class_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z","del","nothing","space"]
 
 mp_hands = mp.solutions.hands
